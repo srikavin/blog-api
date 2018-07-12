@@ -3,9 +3,12 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www"
+    "start": "node ./bin/www",
+    "tsc": "tsc"
   },
   "dependencies": {
+    "@types/bcryptjs": "^2.4.1",
+    "@types/jsonwebtoken": "^7.2.8",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.18.3",
     "cookie-parser": "~1.4.3",
@@ -15,7 +18,14 @@
     "jsonwebtoken": "^8.3.0",
     "mongoose": "^5.1.6",
     "morgan": "~1.9.0",
-    "passport": "^0.4.0",
-    "passport-local": "^1.0.0"
+    "typescript": "^2.9.2"
+  },
+  "devDependencies": {
+    "@types/cookie-parser": "^1.4.1",
+    "@types/es6-shim": "^0.31.37",
+    "@types/express": "^4.16.0",
+    "@types/mongodb": "^3.1.1",
+    "@types/mongoose": "^5.2.0",
+    "@types/morgan": "^1.7.35"
   }
 }
