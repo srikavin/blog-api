@@ -25,9 +25,7 @@ if (config.sshTunnel) {
         dstPort: config.dbPort,
     };
 
-    console.log(sshConfig);
-
-    tunnel(sshConfig, function (error: Error, _server: any) {
+    tunnel(sshConfig, function (error: Error) {
         if (error) {
             console.error(error);
         }
