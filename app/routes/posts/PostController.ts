@@ -75,10 +75,10 @@ router.put('/posts/:id', [
                 author: req.body.author,
                 tags: req.body.tags,
                 overview: req.body.overview,
-                contents: req.body.contents
+                contents: req.body.contents,
+                slug: e.generateAndUpdateSlug(req.body.title)
             };
 
-            e.generateAndUpdateSlug();
             e.update(body).then(() => {
                 res.status(201).send(e);
             });

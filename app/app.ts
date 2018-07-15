@@ -5,6 +5,8 @@ import cookieParser from "cookie-parser";
 import logger from "morgan";
 import bodyParser from "body-parser";
 import mongoose from 'mongoose';
+// @ts-ignore
+import tunnel from 'tunnel-ssh';
 
 import indexRouter from "./routes/index";
 import usersRouter from "./routes/users/UserController";
@@ -14,7 +16,33 @@ import auth from "./AuthController";
 
 import config from "./config";
 
-mongoose.connect('mongodb://' + config.dbHost + '/' + config.dbName);
+if (config.sshTunnel) {
+    let sshConfig = {
+        username: config.sshUsername,
+        password: config.sshPassword,
+        host: config.sshHost,
+        port: config.sshPort,
+        dstPort: config.dbPort,
+    };
+
+    console.log(sshConfig);
+
+    tunnel(sshConfig, function (error: Error, _server: any) {
+        if (error) {
+            console.error(error);
+        }
+        mongoose.connect('mongodb://' + config.dbHost + '/' + config.dbName);
+
+        const db = mongoose.connection;
+        db.on('error', console.error.bind(console, 'DB connection error:'));
+        db.once('open', function () {
+            // we're connected!
+            console.log("DB connection successful");
+        });
+    });
+} else {
+    mongoose.connect('mongodb://' + config.dbHost + '/' + config.dbName);
+}
 
 const app: express.Application = express();
 

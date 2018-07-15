@@ -6,6 +6,5 @@ export interface IPost {
     author?: IUser;
     contents?: string;
     overview?: string;
-    draft: boolean;
     tags: [ITag];
 }

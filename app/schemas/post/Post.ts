@@ -3,7 +3,7 @@ import {IPost} from "./IPost";
 import DataSchema from "../DataSchema";
 
 export interface IPostModel extends IPost, Document {
-    generateAndUpdateSlug(): string
+    generateAndUpdateSlug(newTitle?: string): string
 }
 
 export const PostSchema = DataSchema({
@@ -31,7 +31,7 @@ export const PostSchema = DataSchema({
     }
 });
 
-PostSchema.methods.generateAndUpdateSlug = function () {
+PostSchema.methods.generateAndUpdateSlug = function (newTitle?: string) {
     function slugify(string: string) {
         const a = 'àáäâãåèéëêìíïîòóöôùúüûñçßÿœæŕśńṕẃǵǹḿǘẍźḧ·/_,:;';
         const b = 'aaaaaaeeeeiiiioooouuuuncsyoarsnpwgnmuxzh------';
@@ -47,8 +47,10 @@ PostSchema.methods.generateAndUpdateSlug = function () {
             .replace(/-+$/, '') // Trim - from end of text
     }
 
+    let title = newTitle || this.title;
+
     //Prepend id to end of slug, allowing for multiple articles with same title
-    let slug = this._id + '-' + slugify(this.title);
+    let slug = this._id + '-' + slugify(title);
     this.slug = slug;
     return slug;
 };
