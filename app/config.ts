@@ -1,6 +1,15 @@
 export default {
-    'dbHost': 'ssh.sharath.pro',
+// database - tunneling
+    'sshTunnel': false,
+    'sshHost': '',
+    'sshPort': 22,
+    'sshUsername': '',
+    'sshPassword': '',
+// database - login
+    'dbHost': 'localhost',
+    'dbPort': 27017,
     'dbName': 'db',
     'dbPassword': '',
-    'jwtSecret': 'jwtsecret'
+// jwt
+    'jwtSecret': 'jwtsecret',
 };
