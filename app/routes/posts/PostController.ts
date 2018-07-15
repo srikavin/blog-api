@@ -23,7 +23,8 @@ router.get('/posts/', (req, res) => {
 
     Post.find(query)
         .populate('author', 'username')
-        .populate('tags').exec()
+        .populate('tags')
+        .exec()
         .then((post?) => {
             if (post) {
                 return res.status(200).send(post);
@@ -40,7 +41,6 @@ const postValidators = [
     auth({output: true, continue: false}),
     body('title').exists().isString().withMessage("Must be a string"),
     body('author').exists().isMongoId().withMessage("Must be a valid user id"),
-    body('overview').exists().isString().withMessage("Must be a string"),
     body('tags').exists().isArray().withMessage("Must be an array"),
     body('tags.*').exists().isMongoId().withMessage("Must be a valid ID"),
     body('contents').exists().isString().withMessage("Must be a string")
@@ -55,7 +55,6 @@ router.put('/posts/:id', [
         body('tags').optional().isArray().withMessage("Must be an array"),
         body('tags.*').optional().isMongoId().withMessage("Must be a valid ID"),
         body('contents').optional().isString().withMessage("Must be a string")
-
     ],
     (req: Request, res: Response) => {
         const errors = validationResult(req);
