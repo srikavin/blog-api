@@ -7,4 +7,6 @@ export interface IPost {
     contents?: string;
     overview?: string;
     tags: [ITag];
+    createdAt: Date;
+    updatedAt: Date;
 }

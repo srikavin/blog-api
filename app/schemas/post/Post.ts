@@ -3,7 +3,7 @@ import {IPost} from "./IPost";
 import DataSchema from "../DataSchema";
 
 export interface IPostModel extends IPost, Document {
-    generateAndUpdateSlug(newTitle?: string): string
+    generateAndUpdateMeta(newTitle?: string, newContents?: string): { slug: string, overview: string };
 }
 
 export const PostSchema = DataSchema({
@@ -28,10 +28,17 @@ export const PostSchema = DataSchema({
     }],
     contents: {
         type: String
+    },
+}, {
+    timestamps: {
+        createdAt: 'createdAt',
+        updatedAt: 'updatedAt'
     }
 });
 
-PostSchema.methods.generateAndUpdateSlug = function (newTitle?: string) {
+PostSchema.index({title: 'text', contents: 'text'});
+
+PostSchema.methods.generateAndUpdateMeta = function (newTitle?: string, newContents?: string) {
     function slugify(string: string) {
         const a = 'àáäâãåèéëêìíïîòóöôùúüûñçßÿœæŕśńṕẃǵǹḿǘẍźḧ·/_,:;';
         const b = 'aaaaaaeeeeiiiioooouuuuncsyoarsnpwgnmuxzh------';
@@ -52,7 +59,12 @@ PostSchema.methods.generateAndUpdateSlug = function (newTitle?: string) {
     //Prepend id to end of slug, allowing for multiple articles with same title
     let slug = this._id + '-' + slugify(title);
     this.slug = slug;
-    return slug;
+
+    let contents = newContents || this.contents;
+    let overview = contents.substring(0, 600).trim() + '...';
+    this.overview = overview;
+
+    return {slug, overview};
 };
 
 export const Post: Model<IPostModel> = model<IPostModel>("Post", PostSchema);

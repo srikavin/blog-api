@@ -2,7 +2,7 @@ import {Request, Response, Router} from "express";
 import mongoose from "mongoose";
 
 import {Post} from "../../schemas/post/Post";
-import {body, param, validationResult} from "express-validator/check";
+import {body, param, query, validationResult} from "express-validator/check";
 import {auth} from "../../middle/auth";
 
 const router = Router();
@@ -12,30 +12,39 @@ interface PostQuery {
     author?: string,
 }
 
-router.get('/posts/', (req, res) => {
-    let query: PostQuery = {};
-    const slug = req.query.slug;
-    if (slug) {
-        query.slug = slug;
-    }
+router.get('/posts/', [
+        query('limit').optional().isNumeric(),
+        query('skip').optional().isNumeric()
+    ],
+    (req: Request, res: Response) => {
+        let query: PostQuery = {};
+        const slug = req.query.slug;
+        if (slug) {
+            query.slug = slug;
+        }
 
-    console.log(query);
+        //Limit max request to 50
+        let limit = Math.min((req.query.limit || 25), 50);
+        let skip = req.query.skip || 0;
 
-    Post.find(query)
-        .populate('author', 'username')
-        .populate('tags')
-        .exec()
-        .then((post?) => {
-            if (post) {
-                return res.status(200).send(post);
-            }
-            return res.status(404).send({error: 'No posts found'});
-        })
-        .catch(err => {
-            console.log(err);
-            res.status(500).send({error: 'Unknown error occurred'});
-        });
-});
+        Post.find(query)
+            .populate('author', 'username')
+            .populate('tags')
+            .limit(limit)
+            .skip(skip)
+            .sort({createdAt: 'descending'})
+            .exec()
+            .then((post?) => {
+                if (post) {
+                    return res.status(200).send(post);
+                }
+                return res.status(404).send({error: 'No posts found'});
+            })
+            .catch(err => {
+                console.log(err);
+                res.status(500).send({error: 'Unknown error occurred'});
+            });
+    });
 
 const postValidators = [
     auth({output: true, continue: false}),
@@ -51,7 +60,6 @@ router.put('/posts/:id', [
         param('id').isMongoId().withMessage("Must be valid ID"),
         body('title').optional().isString().withMessage("Must be a string"),
         body('author').optional().isMongoId().withMessage("Must be a valid user id"),
-        body('overview').optional().isString().withMessage("Must be a string"),
         body('tags').optional().isArray().withMessage("Must be an array"),
         body('tags.*').optional().isMongoId().withMessage("Must be a valid ID"),
         body('contents').optional().isString().withMessage("Must be a string")
@@ -69,13 +77,15 @@ router.put('/posts/:id', [
                 return;
             }
 
+            let {slug, overview} = e.generateAndUpdateMeta(req.body.title, req.body.contents);
+
             let body = {
                 title: req.body.title,
                 author: req.body.author,
                 tags: req.body.tags,
-                overview: req.body.overview,
                 contents: req.body.contents,
-                slug: e.generateAndUpdateSlug(req.body.title)
+                slug,
+                overview
             };
 
             e.update(body).then(() => {
@@ -97,10 +107,9 @@ router.post('/posts', postValidators,
             title: req.body.title,
             author: req.body.author,
             tags: req.body.tags,
-            overview: req.body.overview,
             contents: req.body.contents
         }).then(e => {
-            e.generateAndUpdateSlug();
+            e.generateAndUpdateMeta();
             e.save(() => {
                 res.status(200).send(e)
             });
