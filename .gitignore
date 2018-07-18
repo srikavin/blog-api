@@ -1,1 +1,5 @@
-**/config.ts
+/config.json
+.idea/**
+node_modules/**
+build/**
+/**.log

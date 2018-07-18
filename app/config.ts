@@ -1,4 +1,6 @@
-export default {
+let overrides = require('../config.json');
+
+let defaults = {
 // database - tunneling
     'sshTunnel': false,
     'sshHost': '',
@@ -13,3 +15,7 @@ export default {
 // jwt
     'jwtSecret': 'jwtsecret',
 };
+
+let config = Object.assign(defaults, overrides);
+
+export default config;
