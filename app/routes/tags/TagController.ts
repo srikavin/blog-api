@@ -2,14 +2,13 @@ import {Request, Response, Router} from "express";
 import mongoose from "mongoose";
 
 import {Tag} from "../../schemas/tag/Tag";
-import {check, validationResult} from "express-validator/check";
+import {check, param, validationResult} from "express-validator/check";
 import {auth} from "../../middle/auth";
 
 const router = Router();
 
 interface TagQuery {
     name?: string,
-    description?: string,
 }
 
 router.get('/tags/', (req, res) => {
@@ -34,8 +33,21 @@ router.get('/tags/', (req, res) => {
 const tagValidators = [
     auth({output: true, continue: false}),
     check('name').exists().isString().withMessage("Must be a string"),
-    check('description').exists().isString().withMessage("Must be a string")
 ];
+
+router.delete('/tags/:id', [
+    auth({output: true, continue: false}),
+    param('id').isMongoId()
+], (req: Request, res: Response) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(422).json({errors: errors.array()});
+    }
+    Tag.deleteOne({_id: req.params.id})
+        .then(() => {
+            res.status(200).send({success: true});
+        })
+});
 
 router.put('/tags/:id', tagValidators,
     (req: Request, res: Response) => {
@@ -47,9 +59,8 @@ router.put('/tags/:id', tagValidators,
             return res.status(400).send({error: "Invalid id"});
         }
 
-        Tag.update({id: req.params.id}, {
+        Tag.update({_id: req.params.id}, {
             name: req.body.name,
-            description: req.body.description
         }).then(e => {
             res.status(200).send(e);
         });
@@ -62,8 +73,7 @@ router.post('/tags', tagValidators,
             return res.status(422).json({errors: errors.array()});
         }
         Tag.create({
-            name: req.body.name,
-            description: req.body.description
+            name: req.body.name
         }).then(e => {
             e.save(() => {
                 res.status(200).send(e)

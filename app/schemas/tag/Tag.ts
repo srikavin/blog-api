@@ -10,9 +10,6 @@ export const TagSchema = DataSchema({
         type: String,
         unique: true
     },
-    description: {
-        type: String,
-    }
 });
 
 export const Tag: Model<ITagModel> = model<ITagModel>("Tag", TagSchema);
