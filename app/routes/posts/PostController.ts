@@ -10,17 +10,38 @@ const router = Router();
 interface PostQuery {
     slug?: string,
     author?: string,
+    tags?: any
 }
 
 router.get('/posts/', [
         query('limit').optional().isNumeric(),
-        query('skip').optional().isNumeric()
+        query('skip').optional().isNumeric(),
+        query('slug').optional().isString(),
+        query('tags').optional().isArray(),
+        query('tags.*').optional().isMongoId(),
+        query('author').optional().isMongoId()
     ],
     (req: Request, res: Response) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(422).json({errors: errors.array()});
+        }
+
         let query: PostQuery = {};
         const slug = req.query.slug;
+        const tags = req.query.tags;
+        const author = req.query.author;
+
         if (slug) {
             query.slug = slug;
+        }
+        if (tags) {
+            query.tags = {
+                $all: tags
+            };
+        }
+        if (author) {
+            query.author = author;
         }
 
         //Limit max request to 50
