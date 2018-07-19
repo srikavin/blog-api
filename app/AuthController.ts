@@ -46,21 +46,28 @@ router.post('/register', [
         return res.status(422).json({errors: errors.array()});
     }
 
-    let hashedPassword = bcrypt.hashSync(req.body.password, 8);
+    User.count({}).then(count => {
+        if (count >= config.maxUsers) {
+            res.status(400).send({error: 'Registration disabled', auth: false});
+            return;
+        }
 
-    User.create({
-        username: req.body.username,
-        email: req.body.email,
-        password: hashedPassword
-    }).then((user: IUserModel) => {
-        const token = jwt.sign({id: user._id}, config.jwtSecret, {
-            expiresIn: 86400
+        let hashedPassword = bcrypt.hashSync(req.body.password, 8);
+
+        User.create({
+            username: req.body.username,
+            email: req.body.email,
+            password: hashedPassword
+        }).then((user: IUserModel) => {
+            const token = jwt.sign({id: user._id}, config.jwtSecret, {
+                expiresIn: 86400
+            });
+
+            res.status(200).send({auth: true, token: token});
+        }).catch((err) => {
+            console.log(err);
+            res.status(500).send({auth: false, message: 'There was a problem registering the user.'});
         });
-
-        res.status(200).send({auth: true, token: token});
-    }).catch((err) => {
-        console.log(err);
-        res.status(500).send({auth: false, message: 'There was a problem registering the user.'});
     });
 });
 

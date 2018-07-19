@@ -1,5 +1,19 @@
 let overrides = require('../config.json');
 
+interface Config {
+    sshTunnel: boolean;
+    sshHost: string;
+    sshPort: number;
+    sshUsername: string;
+    sshPassword: string;
+    dbHost: string;
+    dbPort: number;
+    dbName: string;
+    dbPassword: string;
+    jwtSecret: string;
+    maxUsers: number;
+}
+
 let defaults = {
 // database - tunneling
     'sshTunnel': false,
@@ -14,8 +28,10 @@ let defaults = {
     'dbPassword': '',
 // jwt
     'jwtSecret': 'jwtsecret',
+// app settings
+    'maxUsers': 1
 };
 
-let config = Object.assign(defaults, overrides);
+let config: Config = Object.assign(defaults, overrides);
 
 export default config;

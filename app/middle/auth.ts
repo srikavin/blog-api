@@ -34,7 +34,7 @@ export function auth(options: AuthMiddlewareOptions): RequestHandler {
 
         let token = req.headers['x-access-token'] as string;
 
-        jwt.verify(token, config.jwtSecret, (err, decoded) => {
+        jwt.verify(token, config.jwtSecret, (err: any, decoded: any) => {
             if (err) {
                 request.authenticated = false;
                 return;
