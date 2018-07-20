@@ -1,6 +1,9 @@
 let overrides = require('../config.json');
 
 interface Config {
+    https: boolean;
+    privateKey: string;
+    certificate: string;
     sshTunnel: boolean;
     sshHost: string;
     sshPort: number;
@@ -15,6 +18,10 @@ interface Config {
 }
 
 let defaults = {
+// http settings
+    'https': false,
+    'privateKey': '',
+    'certificate': '',
 // database - tunneling
     'sshTunnel': false,
     'sshHost': '',
