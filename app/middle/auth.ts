@@ -1,6 +1,6 @@
 import {Request, RequestHandler} from 'express';
-import jwt from "jsonwebtoken";
-import config from "../config";
+import jwt from 'jsonwebtoken';
+import config from '../config';
 
 interface AuthMiddlewareOptions {
     /**
@@ -22,10 +22,14 @@ interface JWTVerifyResult {
     id: string;
 }
 
-export function auth(options: AuthMiddlewareOptions): RequestHandler {
+export function auth(options: Partial<AuthMiddlewareOptions> = {}): RequestHandler {
     //Set defaults
-    options.output = options.output || false;
-    options.continue = options.continue !== undefined ? options.continue : true;
+    if (options.output === undefined) {
+        options.output = true;
+    }
+    if (options.continue === undefined) {
+        options.continue = false;
+    }
     return function (req, res, next) {
         let request = req as AuthRequest;
 
@@ -46,7 +50,7 @@ export function auth(options: AuthMiddlewareOptions): RequestHandler {
 
         if (!request.authenticated) {
             if (options.output) {
-                res.status(401).send({error: "Requires authentication"});
+                res.status(401).send({error: 'Requires authentication'});
             }
             if (options.continue) {
                 next();
@@ -55,5 +59,5 @@ export function auth(options: AuthMiddlewareOptions): RequestHandler {
         }
 
         next();
-    }
+    };
 }
