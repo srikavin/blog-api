@@ -1,44 +1,36 @@
-import express from "express";
-import mongoose from "mongoose";
+import {Request, RequestHandler, Response, Router} from 'express';
+import {Model} from 'mongoose';
 
-import {User} from "../../schemas/user/User";
+import {IUserModel, User} from '../../schemas/user/User';
+import {RestController} from '../RestController';
+import {param, query} from 'express-validator/check';
+import {CheckValidation} from '../../util/CheckValidation';
 
-const router = express.Router();
-
-router.get('/users/', (req, res) => {
-    const username = req.query.username;
-    if (!username) {
-        return res.status(400).send({error: 'Must provide a username'});
+export class UserController extends RestController<IUserModel> {
+    constructor(defHandlers: RequestHandler[]) {
+        super(defHandlers);
     }
 
-    User.findOne({username: username}).exec()
-        .then((user?) => {
-            if (user) {
-                return res.status(200).send(user);
-            }
-            return res.status(404).send({error: 'User not found'});
-        })
-        .catch(err => {
-            console.log(err);
-            res.status(500).send({error: 'Unknown error occurred'});
-        });
-});
-
-router.get('/users/:id', (req, res) => {
-    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-        return res.status(400).send({error: "Invalid id"});
+    protected getModel(): Model<IUserModel> {
+        return User;
     }
-    User.findOne({_id: req.params.id}).exec()
-        .then((user?) => {
-            if (!user) {
-                return res.status(404).send({error: 'User not found'});
-            }
-            return res.status(200).send(user);
-        })
-        .catch((err: any) => {
-            console.log(err);
-            return res.status(500).send({error: 'Unknown error'});
-        });
-});
 
-export default router;
+    protected register(router: Router) {
+        router.get('/', [query('username').isString()], this.getByUsername);
+        router.get('/:id', [param('id').isMongoId()], this.getByID);
+    }
+
+    @CheckValidation
+    private getByUsername(req: Request, res: Response) {
+        User.findOne({username: req.query.username})
+            .then(this.sendEntity(res))
+            .catch(this.error(res));
+    }
+
+    @CheckValidation
+    private getByID(req: Request, res: Response) {
+        this.getEntity(req.params.id)
+            .then(this.sendEntity(res))
+            .catch(this.error(res));
+    }
+}

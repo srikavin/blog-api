@@ -5,7 +5,7 @@ import cookieParser from 'cookie-parser';
 import logger from 'morgan';
 import bodyParser from 'body-parser';
 
-import usersRouter from './routes/users/UserController';
+import {UserController} from './routes/users/UserController';
 import postsRouter from './routes/posts/PostController';
 import tagsRouter from './routes/tags/TagController';
 import imagesRouter from './routes/images/ImageController';
@@ -28,7 +28,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 
-app.use('/api/v1/', usersRouter);
+app.use('/api/v1/users', new UserController([]).getRouter());
 app.use('/api/v1/', postsRouter);
 app.use('/api/v1/', tagsRouter);
 app.use('/api/v1/', imagesRouter);
