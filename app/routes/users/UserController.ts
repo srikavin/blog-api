@@ -5,10 +5,16 @@ import {IUserModel, User} from '../../schemas/user/User';
 import {RestController} from '../RestController';
 import {param, query} from 'express-validator/check';
 import {CheckValidation} from '../../util/CheckValidation';
+import {IUser} from '../../schemas/user/IUser';
 
-export class UserController extends RestController<IUserModel> {
+export class UserController extends RestController<IUser, IUserModel, null> {
     constructor(defHandlers: RequestHandler[]) {
         super(defHandlers);
+    }
+
+    protected bindMethods(): void {
+        this.getByID = this.getByID.bind(this);
+        this.getByUsername = this.getByUsername.bind(this);
     }
 
     protected getModel(): Model<IUserModel> {

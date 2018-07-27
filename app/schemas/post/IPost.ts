@@ -1,7 +1,7 @@
-import {IUser} from "../user/IUser";
-import {ITag} from "../tag/ITag";
+import {IUser} from '../user/IUser';
+import {ITag} from '../tag/ITag';
 
-export interface IPost {
+export interface IPost extends Schema {
     title?: string;
     author?: IUser;
     contents?: string;

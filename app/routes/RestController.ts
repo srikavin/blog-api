@@ -1,7 +1,14 @@
 import {Document, Model, Types} from 'mongoose';
-import {RequestHandler, Response, Router} from 'express';
+import {Request, RequestHandler, Response, Router} from 'express';
 
-export abstract class RestController<T extends Document> {
+export interface QueryParams<T> {
+    limit: number,
+    skip: number,
+    fields: T
+}
+
+
+export abstract class RestController<T extends Schema, M extends Document, F> {
 
     protected router: Router;
 
@@ -9,6 +16,7 @@ export abstract class RestController<T extends Document> {
         this.router = Router();
         this.getCommonMiddleware().forEach((e) => this.router.use(e));
         defHandlers.forEach((e) => this.router.use(e));
+        this.bindMethods();
         this.register(this.router);
     }
 
@@ -18,13 +26,15 @@ export abstract class RestController<T extends Document> {
 
     protected abstract register(router: Router): void;
 
-    protected abstract getModel(): Model<T>;
+    protected abstract bindMethods(): void;
+
+    protected abstract getModel(): Model<M>;
 
     protected getCommonMiddleware(): RequestHandler[] {
         return [];
     }
 
-    protected updateEntity(id: Types.ObjectId, entity: T) {
+    protected updateEntity(id: Types.ObjectId | string, entity: T) {
         return this.getModel().updateOne({
             _id: id
         }, entity);
@@ -34,8 +44,23 @@ export abstract class RestController<T extends Document> {
         return this.getModel().findById(id);
     }
 
-    protected addEntity(item: T) {
-        return this.getModel().create(item);
+    protected getEntities(query: QueryParams<Partial<F>>) {
+        return this.getModel().find(query.fields).skip(query.skip).limit(query.limit).exec();
+    }
+
+    protected handleQuery(req: Request): QueryParams<Partial<F>> {
+        let ret: QueryParams<Partial<F>> = {limit: 50, skip: 0, fields: {}};
+        if (req.params.limit) {
+            ret.limit = req.params.limit;
+        }
+        if (req.params.skip) {
+            ret.skip = req.params.skip;
+        }
+        return ret;
+    }
+
+    protected createEntity(entity: T) {
+        return this.getModel().create(entity);
     }
 
     protected deleteEntity(id: Types.ObjectId) {
@@ -61,4 +86,9 @@ export abstract class RestController<T extends Document> {
         };
     }
 
+    protected sendEntities(res: Response) {
+        return function (e: T[]) {
+            res.status(200).send(e);
+        };
+    }
 }

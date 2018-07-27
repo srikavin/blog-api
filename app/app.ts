@@ -7,7 +7,7 @@ import bodyParser from 'body-parser';
 
 import {UserController} from './routes/users/UserController';
 import postsRouter from './routes/posts/PostController';
-import tagsRouter from './routes/tags/TagController';
+import {TagController} from './routes/tags/TagController';
 import imagesRouter from './routes/images/ImageController';
 import auth from './AuthController';
 
@@ -30,7 +30,7 @@ app.use(bodyParser.urlencoded({extended: true}));
 
 app.use('/api/v1/users', new UserController([]).getRouter());
 app.use('/api/v1/', postsRouter);
-app.use('/api/v1/', tagsRouter);
+app.use('/api/v1/tags', new TagController([]).getRouter());
 app.use('/api/v1/', imagesRouter);
 app.use('/api/v1/auth', auth);
 

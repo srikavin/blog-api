@@ -1,3 +1,3 @@
-export interface ITag {
+export interface ITag extends Schema {
     name?: string;
 }

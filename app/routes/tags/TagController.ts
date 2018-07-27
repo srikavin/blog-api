@@ -1,101 +1,94 @@
-import {Request, Response, Router} from "express";
-import mongoose from "mongoose";
+import {Request, RequestHandler, Response, Router} from 'express';
+import {Model} from 'mongoose';
 
-import {Tag} from "../../schemas/tag/Tag";
-import {check, param, validationResult} from "express-validator/check";
-import {auth} from "../../middle/auth";
+import {ITagModel, Tag} from '../../schemas/tag/Tag';
+import {body, param} from 'express-validator/check';
+import {QueryParams, RestController} from '../RestController';
+import {CheckValidation} from '../../util/CheckValidation';
+import {RequireAuth} from '../../util/RequireAuth';
+import {ITag} from '../../schemas/tag/ITag';
 
-const router = Router();
-
-interface TagQuery {
-    name?: string,
+interface TagFields {
+    _id: string
+    name: string,
 }
 
-router.get('/tags/', (req, res) => {
-    let query: TagQuery = {};
-    if (req.query.name) {
-        query.name = req.query.name;
+export class TagController extends RestController<ITag, ITagModel, TagFields> {
+    constructor(defHandlers: RequestHandler[]) {
+        super(defHandlers);
     }
 
-    Tag.find(query).exec()
-        .then((tag?) => {
-            if (tag) {
-                return res.status(200).send(tag);
-            }
-            return res.status(404).send({error: 'No tags found'});
-        })
-        .catch(err => {
-            console.log(err);
-            res.status(500).send({error: 'Unknown error occurred'});
-        });
-});
-
-const tagValidators = [
-    auth({output: true, continue: false}),
-    check('name').exists().isString().withMessage("Must be a string"),
-];
-
-router.delete('/tags/:id', [
-    auth({output: true, continue: false}),
-    param('id').isMongoId()
-], (req: Request, res: Response) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(422).json({errors: errors.array()});
+    protected bindMethods(): void {
+        this.getAll = this.getAll.bind(this);
+        this.getByID = this.getByID.bind(this);
+        this.create = this.create.bind(this);
+        this.update = this.update.bind(this);
+        this.delete = this.delete.bind(this);
     }
-    Tag.deleteOne({_id: req.params.id})
-        .then(() => {
-            res.status(200).send({success: true});
-        })
-});
 
-router.put('/tags/:id', tagValidators,
-    (req: Request, res: Response) => {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(422).json({errors: errors.array()});
+    protected register(router: Router) {
+        router.get('/', [], this.getAll);
+        router.get('/:id', [param('id').isMongoId()], this.getByID);
+        router.post('/', [body('name').isString()], this.create);
+        router.put('/:id', [body('name').isString(), param('id').isMongoId()], this.update);
+        router.delete('/:id', [param('id').isMongoId()], this.delete);
+    }
+
+    protected getModel(): Model<ITagModel> {
+        return Tag;
+    }
+
+    protected handleQuery(req: Request): QueryParams<Partial<TagFields>> {
+        let ret = super.handleQuery(req);
+
+        if (req.params.id) {
+            ret.fields._id = req.params.id;
         }
-        if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-            return res.status(400).send({error: "Invalid id"});
+        if (req.params.name) {
+            ret.fields.name = req.params.name;
         }
 
-        Tag.update({_id: req.params.id}, {
-            name: req.body.name,
-        }).then(e => {
-            res.status(200).send(e);
-        });
-    });
+        return ret;
+    }
 
-router.post('/tags', tagValidators,
-    (req: Request, res: Response) => {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(422).json({errors: errors.array()});
-        }
-        Tag.create({
+    private getAll(req: Request, res: Response) {
+        this.getEntities(this.handleQuery(req))
+            .then(this.sendEntities(res))
+            .catch(this.error(res));
+    }
+
+    @CheckValidation
+    private getByID(req: Request, res: Response) {
+        this.getEntity(req.params.id)
+            .then(this.sendEntity(res))
+            .catch(this.error(res));
+    }
+
+    @RequireAuth
+    @CheckValidation
+    private create(req: Request, res: Response) {
+        this.createEntity({
             name: req.body.name
-        }).then(e => {
-            e.save(() => {
-                res.status(200).send(e)
-            });
-        });
-    });
-
-router.get('/tags/:id', (req, res) => {
-    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-        return res.status(400).send({error: "Invalid id"});
-    }
-    Tag.findOne({_id: req.params.id}).exec()
-        .then((tag?) => {
-            if (!tag) {
-                return res.status(404).send({error: 'Tag not found'});
-            }
-            return res.status(200).send(tag);
         })
-        .catch((err: any) => {
-            console.log(err);
-            return res.status(500).send({error: 'Unknown error'});
-        });
-});
+            .then(this.sendEntity(res))
+            .catch(this.error(res));
+    }
 
-export default router;
+    @RequireAuth
+    @CheckValidation
+    private update(req: Request, res: Response) {
+        this.updateEntity(req.params.id, {
+            name: req.body.name
+        })
+            .then(this.sendEntity(res))
+            .catch(this.error(res));
+    }
+
+    @RequireAuth
+    @CheckValidation
+    private delete(req: Request, res: Response) {
+        this.deleteEntity(req.params.id)
+            .then(() => res.status(200).send({success: true}))
+            .catch(this.error(res));
+    }
+}

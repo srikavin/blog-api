@@ -1,4 +1,4 @@
-export interface IImage {
+export interface IImage extends Schema {
     title: string;
     contents: Buffer;
     small: Buffer;
