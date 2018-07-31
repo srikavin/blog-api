@@ -2,11 +2,13 @@ import {IUser} from '../user/IUser';
 import {ITag} from '../tag/ITag';
 
 export interface IPost extends Schema {
-    title?: string;
-    author?: IUser;
-    contents?: string;
-    overview?: string;
+    title: string;
+    author: IUser;
+    contents: string;
     tags: [ITag];
-    createdAt: Date;
-    updatedAt: Date;
+    draft: boolean;
+    overview?: string;
+    createdAt?: Date;
+    updatedAt?: Date;
+    slug?: string;
 }

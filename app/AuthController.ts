@@ -1,13 +1,17 @@
-import {Request, Response, Router} from "express";
-import jwt, {VerifyErrors} from "jsonwebtoken";
-import bcrypt from "bcryptjs";
-import {check, validationResult} from "express-validator/check";
+import {Request, Response, Router} from 'express';
+import jwt, {VerifyErrors} from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
+import {check, validationResult} from 'express-validator/check';
 
-import config from "./config";
+import config from './config';
 
-import {IUserModel, User} from "./schemas/user/User";
+import {IUserModel, User} from './schemas/user/User';
+import bodyParser from 'body-parser';
 
 const router = Router();
+
+router.use(bodyParser.json());
+router.use(bodyParser.urlencoded({extended: true}));
 
 router.post('/register', [
     check('username').trim().isLength({min: 5, max: 18}).withMessage('Must be between 5 and 18 characters')

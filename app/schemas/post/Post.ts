@@ -1,6 +1,6 @@
-import {Document, Model, model, Schema} from "mongoose";
-import {IPost} from "./IPost";
-import DataSchema from "../DataSchema";
+import {Document, Model, model, Schema} from 'mongoose';
+import {IPost} from './IPost';
+import DataSchema from '../DataSchema';
 
 export interface IPostModel extends IPost, Document {
     generateAndUpdateMeta(newTitle?: string, newContents?: string): { slug: string, overview: string };
@@ -8,7 +8,7 @@ export interface IPostModel extends IPost, Document {
 
 export const PostSchema = DataSchema({
     title: {
-        type: String,
+        type: String
     },
     slug: {
         type: String,
@@ -19,21 +19,29 @@ export const PostSchema = DataSchema({
         type: Schema.Types.ObjectId,
         ref: 'User'
     },
-    overview: {
-        type: String
-    },
     tags: [{
         type: Schema.Types.ObjectId,
         ref: 'Tag'
     }],
-    contents: {
+    draft: {
+        type: Schema.Types.Boolean
+    },
+    overview: {
         type: String
     },
+    contents: {
+        type: String
+    }
 }, {
     timestamps: {
         createdAt: 'createdAt',
         updatedAt: 'updatedAt'
     }
+});
+
+PostSchema.pre('save', function (next) {
+    (this as IPostModel).generateAndUpdateMeta();
+    next();
 });
 
 PostSchema.index({title: 'text', contents: 'text'});
@@ -51,7 +59,7 @@ PostSchema.methods.generateAndUpdateMeta = function (newTitle?: string, newConte
             .replace(/[^\w\-]+/g, '') // Remove all non-word characters
             .replace(/--+/g, '-') // Replace multiple - with single -
             .replace(/^-+/, '') // Trim - from start of text
-            .replace(/-+$/, '') // Trim - from end of text
+            .replace(/-+$/, ''); // Trim - from end of text
     }
 
     let title = newTitle || this.title;
@@ -67,4 +75,4 @@ PostSchema.methods.generateAndUpdateMeta = function (newTitle?: string, newConte
     return {slug, overview};
 };
 
-export const Post: Model<IPostModel> = model<IPostModel>("Post", PostSchema);
+export const Post: Model<IPostModel> = model<IPostModel>('Post', PostSchema);

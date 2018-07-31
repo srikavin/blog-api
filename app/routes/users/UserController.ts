@@ -1,4 +1,4 @@
-import {Request, RequestHandler, Response, Router} from 'express';
+import {Request, Response, Router} from 'express';
 import {Model} from 'mongoose';
 
 import {IUserModel, User} from '../../schemas/user/User';
@@ -8,8 +8,8 @@ import {CheckValidation} from '../../util/CheckValidation';
 import {IUser} from '../../schemas/user/IUser';
 
 export class UserController extends RestController<IUser, IUserModel, null> {
-    constructor(defHandlers: RequestHandler[]) {
-        super(defHandlers);
+    constructor() {
+        super();
     }
 
     protected bindMethods(): void {

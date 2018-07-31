@@ -1,5 +1,6 @@
-import {Document, Model, Types} from 'mongoose';
+import {Document, DocumentQuery, Model, Types} from 'mongoose';
 import {Request, RequestHandler, Response, Router} from 'express';
+import bodyParser from 'body-parser';
 
 export interface QueryParams<T> {
     limit: number,
@@ -7,21 +8,29 @@ export interface QueryParams<T> {
     fields: T
 }
 
+interface PopulateType {
+    select: string;
+    path: string;
+}
+
 
 export abstract class RestController<T extends Schema, M extends Document, F> {
-
+    protected defHandlers: RequestHandler[] = [bodyParser.json(), bodyParser.urlencoded({extended: true})];
     protected router: Router;
 
-    protected constructor(defHandlers: RequestHandler[]) {
+    protected constructor() {
         this.router = Router();
-        this.getCommonMiddleware().forEach((e) => this.router.use(e));
-        defHandlers.forEach((e) => this.router.use(e));
-        this.bindMethods();
-        this.register(this.router);
     }
 
     public getRouter(): Router {
         return this.router;
+    }
+
+    public init() {
+        this.getCommonMiddleware().forEach((e) => this.router.use(e));
+        this.defHandlers.forEach((e) => this.router.use(e));
+        this.bindMethods();
+        this.register(this.router);
     }
 
     protected abstract register(router: Router): void;
@@ -34,29 +43,49 @@ export abstract class RestController<T extends Schema, M extends Document, F> {
         return [];
     }
 
-    protected updateEntity(id: Types.ObjectId | string, entity: T) {
+    protected updateEntity(id: Types.ObjectId | string, entity: Partial<T>) {
         return this.getModel().updateOne({
             _id: id
         }, entity);
     }
 
-    protected getEntity(id: Types.ObjectId) {
-        return this.getModel().findById(id);
+    protected getEntity(id: Types.ObjectId, populateFields: Array<string | PopulateType> = [],
+                        custom: ((a: DocumentQuery<M | null, M>) => DocumentQuery<M | null, M>) = (e) => e) {
+        let req = this.getModel().findById(id);
+        return custom(this.handlePopulate(populateFields, req)).exec();
     }
 
-    protected getEntities(query: QueryParams<Partial<F>>) {
-        return this.getModel().find(query.fields).skip(query.skip).limit(query.limit).exec();
+    protected getEntities(query: QueryParams<Partial<F>>, populateFields: Array<string | PopulateType> = [], sort: any = {},
+                          custom: ((a: DocumentQuery<M[], M>) => DocumentQuery<M[], M>) = (e) => e) {
+        let req = this.getModel()
+            .find(query.fields)
+            .skip(query.skip)
+            .limit(query.limit);
+        console.log(populateFields);
+        return custom(this.handlePopulate(populateFields, req).sort(sort)).exec();
     }
 
     protected handleQuery(req: Request): QueryParams<Partial<F>> {
         let ret: QueryParams<Partial<F>> = {limit: 50, skip: 0, fields: {}};
-        if (req.params.limit) {
-            ret.limit = req.params.limit;
+        if (req.query.limit) {
+            ret.limit = req.query.limit;
         }
-        if (req.params.skip) {
-            ret.skip = req.params.skip;
+        if (req.query.skip) {
+            ret.skip = req.query.skip;
         }
         return ret;
+    }
+
+    private handlePopulate<A, B extends Document>(fields: Array<string | PopulateType>, query: DocumentQuery<A, B>) {
+        fields.forEach(e => {
+            console.log(e);
+            if (typeof e === 'string') {
+                query = query.populate(e);
+            } else {
+                query = query.populate(e.path, e.select);
+            }
+        });
+        return query;
     }
 
     protected createEntity(entity: T) {

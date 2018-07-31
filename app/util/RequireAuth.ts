@@ -2,10 +2,14 @@ import {Request, Response} from 'express';
 import jwt from 'jsonwebtoken';
 import config from '../config';
 
-export const RequireAuth: MethodDecorator = (target: Object, _propertyKey: string | symbol, descriptor: TypedPropertyDescriptor<any>) => {
+interface AuthInterface extends Request {
+    _authInfo: any;
+}
+
+export const RequireAuth: MethodDecorator = (_target: Object, _propertyKey: string | symbol, descriptor: TypedPropertyDescriptor<any>) => {
     let oldFunc: Function | undefined = descriptor.value;
 
-    descriptor.value = (req: Request, res: Response, ...args: any[]) => {
+    descriptor.value = function (req: Request, res: Response, ...args: any[]) {
         let token = req.headers['x-access-token'] as string;
         let auth = false;
 
@@ -17,11 +21,12 @@ export const RequireAuth: MethodDecorator = (target: Object, _propertyKey: strin
 
             if (decoded) {
                 auth = true;
+                (<AuthInterface> req)._authInfo = decoded;
             }
         });
 
         if (auth && oldFunc) {
-            return oldFunc.apply(target, [req, res, ...args]);
+            return oldFunc.apply(this, [req, res, ...args]);
         } else {
             res.status(401).send({error: 'Requires authentication'});
             return;
@@ -32,5 +37,9 @@ export const RequireAuth: MethodDecorator = (target: Object, _propertyKey: strin
 
     return descriptor;
 };
+
+export function getAuth(req: Request): any {
+    return (<AuthInterface> req)._authInfo;
+}
 
 

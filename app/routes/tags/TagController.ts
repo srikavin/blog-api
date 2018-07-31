@@ -1,4 +1,4 @@
-import {Request, RequestHandler, Response, Router} from 'express';
+import {Request, Response, Router} from 'express';
 import {Model} from 'mongoose';
 
 import {ITagModel, Tag} from '../../schemas/tag/Tag';
@@ -14,8 +14,13 @@ interface TagFields {
 }
 
 export class TagController extends RestController<ITag, ITagModel, TagFields> {
-    constructor(defHandlers: RequestHandler[]) {
-        super(defHandlers);
+    private readonly queryValidators = [
+        param('id').optional().isMongoId(),
+        param('name').optional().isString()
+    ];
+
+    constructor() {
+        super();
     }
 
     protected bindMethods(): void {
@@ -27,7 +32,7 @@ export class TagController extends RestController<ITag, ITagModel, TagFields> {
     }
 
     protected register(router: Router) {
-        router.get('/', [], this.getAll);
+        router.get('/', this.queryValidators, this.getAll);
         router.get('/:id', [param('id').isMongoId()], this.getByID);
         router.post('/', [body('name').isString()], this.create);
         router.put('/:id', [body('name').isString(), param('id').isMongoId()], this.update);
@@ -51,6 +56,7 @@ export class TagController extends RestController<ITag, ITagModel, TagFields> {
         return ret;
     }
 
+    @CheckValidation
     private getAll(req: Request, res: Response) {
         this.getEntities(this.handleQuery(req))
             .then(this.sendEntities(res))
