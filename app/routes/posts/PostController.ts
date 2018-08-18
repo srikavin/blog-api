@@ -51,14 +51,16 @@ export class PostController extends RestController<IPost, IPostModel, PostQuery>
         this.getByID = this.getByID.bind(this);
         this.create = this.create.bind(this);
         this.update = this.update.bind(this);
+        this.delete = this.delete.bind(this);
     }
 
     protected register(router: Router): void {
         router.get('/', this.queryValidators, this.getAll);
         router.get('/drafts', this.queryValidators, this.getDrafts);
-        router.get('/:id', [param('id').isMongoId()], this.getByID);
         router.post('/', this.createValidators, this.create);
+        router.get('/:id', [param('id').isMongoId()], this.getByID);
         router.put('/:id', this.updateValidators, this.update);
+        router.delete('/:id', [param('id').isMongoId()], this.delete);
     }
 
     protected handleQuery(req: Request): QueryParams<Partial<PostQuery>> {
@@ -97,17 +99,27 @@ export class PostController extends RestController<IPost, IPostModel, PostQuery>
         this.getEntities(this.handleQuery(req),
             this.populateFields,
             {'createdAt': 'descending'},
-            (e) => req.query.slug ? e : e.select('-contents'))
+            (e) => req.query.slug || req.query.contents ? e : e.select('-contents')
+        )
             .then(this.sendEntities(res))
             .catch(this.error(res));
     }
 
+    @RequireAuth
+    @CheckValidation
+    private delete(req: Request, res: Response) {
+        this.deleteEntity(req.params.id)
+            .then(() => {
+                res.status(200).send({status: 'success'});
+            }).catch(this.error(res));
+    }
+
+    @RequireAuth
     @CheckValidation
     private getDrafts(req: Request, res: Response) {
         this.getEntities({...this.handleQuery(req), fields: {...this.handleQuery(req).fields, draft: true}},
             this.populateFields,
-            {'createdAt': 'descending'},
-            (e) => req.query.slug ? e : e.select('-contents'))
+            {'createdAt': 'descending'})
             .then(this.sendEntities(res))
             .catch(this.error(res));
     }

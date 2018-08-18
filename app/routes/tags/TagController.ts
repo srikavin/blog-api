@@ -86,6 +86,7 @@ export class TagController extends RestController<ITag, ITagModel, TagFields> {
         this.updateEntity(req.params.id, {
             name: req.body.name
         })
+            .then(() => this.getEntity(req.params.id))
             .then(this.sendEntity(res))
             .catch(this.error(res));
     }

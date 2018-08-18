@@ -61,7 +61,6 @@ export abstract class RestController<T extends Schema, M extends Document, F> {
             .find(query.fields)
             .skip(query.skip)
             .limit(query.limit);
-        console.log(populateFields);
         return custom(this.handlePopulate(populateFields, req).sort(sort)).exec();
     }
 
@@ -78,7 +77,6 @@ export abstract class RestController<T extends Schema, M extends Document, F> {
 
     private handlePopulate<A, B extends Document>(fields: Array<string | PopulateType>, query: DocumentQuery<A, B>) {
         fields.forEach(e => {
-            console.log(e);
             if (typeof e === 'string') {
                 query = query.populate(e);
             } else {
@@ -92,10 +90,8 @@ export abstract class RestController<T extends Schema, M extends Document, F> {
         return this.getModel().create(entity);
     }
 
-    protected deleteEntity(id: Types.ObjectId) {
-        return this.getModel().deleteOne({
-            _id: id
-        });
+    protected deleteEntity(id: Types.ObjectId | string) {
+        return this.getModel().deleteOne({_id: id});
     }
 
     protected error(res: Response) {
