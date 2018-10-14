@@ -7,9 +7,6 @@
     "tsc": "tsc"
   },
   "dependencies": {
-    "@types/bcryptjs": "^2.4.1",
-    "@types/gridfs-stream": "^0.5.30",
-    "@types/jsonwebtoken": "^7.2.8",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.18.3",
     "cookie-parser": "~1.4.3",
@@ -22,15 +19,20 @@
     "morgan": "~1.9.0",
     "sharp": "^0.20.5",
     "tunnel-ssh": "^4.1.4",
-    "typescript": "^2.9.2"
+    "typescript": "^2.9.2",
+    "xml": "^1.0.1"
   },
   "devDependencies": {
+    "@types/bcryptjs": "^2.4.1",
+    "@types/gridfs-stream": "^0.5.30",
+    "@types/jsonwebtoken": "^7.2.8",
     "@types/cookie-parser": "^1.4.1",
     "@types/es6-shim": "^0.31.37",
     "@types/express": "^4.16.0",
     "@types/mongodb": "^3.1.1",
     "@types/mongoose": "^5.2.0",
     "@types/morgan": "^1.7.35",
-    "@types/sharp": "^0.17.9"
+    "@types/sharp": "^0.17.9",
+    "@types/xml": "^1.0.2"
   }
 }
