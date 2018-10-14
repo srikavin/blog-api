@@ -37,6 +37,9 @@ export class SitemapController extends RestController<IPost, IPostModel, Sitemap
 
         this.getEntities({limit: 5000, skip: 0, fields: {}}).then(e => {
             e.forEach((item: IPostModel) => {
+                if (item.draft) {
+                    return;
+                }
                 let contents = [];
                 contents.push({loc: `https://${hostname}/blog/posts/${item.slug}`});
                 if (item.updatedAt) {
