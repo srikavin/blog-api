@@ -53,20 +53,6 @@ router.get('/images/raw/:id', [
         });
 
         return;
-
-        Image.findById(id)
-            .exec()
-            .then(e => {
-                if (e) {
-                    res.status(200).contentType('image/png').send(e.contents);
-                    return;
-                }
-                res.status(404).send({error: 'Not found'});
-            })
-            .catch(err => {
-                console.error(err);
-                res.status(500).send({error: 'Unknown error'});
-            });
     });
 router.get('/images/:id', [
         param('id').isMongoId()
@@ -110,12 +96,10 @@ router.post('/images', [
 
         let img = sharp(fileContents);
         img.metadata().then(meta => {
-            img.resize(20, 20)
-                .withoutEnlargement(true)
-                .min()
+            img.resize({canvas: 'min', height: 20, width: 20, withoutEnlargement: true})
                 .png()
                 .toBuffer()
-                .then(value => {
+                .then((value: Buffer) => {
                     Image.create({
                         title: req.body.title,
                         small: value,
