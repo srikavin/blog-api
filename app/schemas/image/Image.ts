@@ -39,6 +39,6 @@ export const ImageSchema = DataSchema({
     ret.url = `/images/raw/${_doc._id}`;
 });
 
-ImageSchema.index({title: 'text', contents: 'text'});
+ImageSchema.index({title: 'text'});
 
 export const Image: Model<IImageModel> = model<IImageModel>('Image', ImageSchema);
