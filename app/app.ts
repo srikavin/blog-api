@@ -8,6 +8,7 @@ import {UserController} from './routes/users/UserController';
 import {PostController} from './routes/posts/PostController';
 import {TagController} from './routes/tags/TagController';
 import imagesRouter from './routes/images/ImageController';
+import filesRouter from './routes/files/FileController';
 import auth from './AuthController';
 import {SitemapController} from './routes/SitemapController';
 
@@ -34,6 +35,7 @@ app.use('/api/v1/users', userController.getRouter());
 app.use('/api/v1/tags', tagController.getRouter());
 app.use('/api/v1/posts', postController.getRouter());
 app.use('/api/v1/', imagesRouter);
+app.use('/api/v1/', filesRouter);
 app.use('/api/v1/', sitemapController.getRouter());
 app.use('/api/v1/auth', auth);
 
