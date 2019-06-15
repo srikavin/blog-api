@@ -3,8 +3,19 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node ./build/start",
-    "tsc": "tsc"
+    "start": "npm run serve",
+    "build": "npm run npm run build-ts && npm run tslint",
+    "serve": "node build/start.js",
+    "watch-node": "nodemon build/start.js",
+    "watch": "concurrently -k -p \"[{name}]\" -n \"TypeScript,Node\" -c \"cyan.bold,green.bold\" \"npm run watch-ts\" \"npm run watch-node\"",
+    "test": "jest --forceExit --coverage --verbose",
+    "watch-test": "npm run test -- --watchAll",
+    "build-ts": "tsc",
+    "watch-ts": "tsc -w",
+    "tslint": "tslint -c tslint.json -p tsconfig.json",
+    "debug": "npm run build && npm run watch-debug",
+    "serve-debug": "nodemon --inspect build/start.js",
+    "watch-debug": "concurrently -k -p \"[{name}]\" -n \"TypeScript,Node\" -c \"cyan.bold,green.bold\" \"npm run watch-ts\" \"npm run serve-debug\""
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
@@ -34,6 +45,8 @@
     "@types/mongoose": "^5.3.26",
     "@types/morgan": "^1.7.35",
     "@types/sharp": "^0.22.1",
-    "@types/xml": "^1.0.3"
+    "@types/xml": "^1.0.3",
+    "concurrently": "^4.1.0",
+    "nodemon": "^1.18.10"
   }
 }

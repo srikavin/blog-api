@@ -13,6 +13,7 @@ interface PostQuery {
     author?: string;
     tags?: any;
     draft?: boolean;
+    search?: string;
 }
 
 export class PostController extends RestController<IPost, IPostModel, PostQuery> {
@@ -22,7 +23,8 @@ export class PostController extends RestController<IPost, IPostModel, PostQuery>
         query('slug').optional().isString(),
         query('tags').optional().isArray(),
         query('tags.*').optional().isMongoId(),
-        query('author').optional().isMongoId()
+        query('author').optional().isMongoId(),
+        query('search').optional().isString()
     ];
 
     private readonly createValidators = [
@@ -66,7 +68,7 @@ export class PostController extends RestController<IPost, IPostModel, PostQuery>
     protected handleQuery(req: Request): QueryParams<Partial<PostQuery>> {
         let ret = super.handleQuery(req);
 
-        let {slug, tags, author} = req.query;
+        let {slug, tags, author, search} = req.query;
 
         if (slug) {
             ret.fields.slug = slug;
@@ -79,7 +81,15 @@ export class PostController extends RestController<IPost, IPostModel, PostQuery>
         if (author) {
             ret.fields.author = author;
         }
+
+        if (search) {
+            // @ts-ignore
+            ret.fields.$text = {$search: search};
+        }
+
         ret.fields.draft = false;
+
+        console.log(ret);
         return ret;
     }
 
