@@ -168,6 +168,7 @@ export class PostController extends RestController<IPost, IPostModel, PostQuery>
                     title: req.body.title,
                     tags: req.body.tags,
                     contents: req.body.contents,
+                    draft: req.body.draft === undefined ? e.draft : req.body.draft
                     slug,
                     overview
                 };
