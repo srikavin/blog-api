@@ -96,7 +96,7 @@ router.post('/images', [
 
         let img = sharp(fileContents);
         img.metadata().then(meta => {
-            img.resize({canvas: 'min', height: 20, width: 20, withoutEnlargement: true})
+            img.resize(20, 20, {withoutEnlargement: true})
                 .png()
                 .toBuffer()
                 .then((value: Buffer) => {
