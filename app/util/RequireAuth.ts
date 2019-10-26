@@ -21,7 +21,7 @@ export const RequireAuth: MethodDecorator = (_target: Object, _propertyKey: stri
 
             if (decoded) {
                 auth = true;
-                (<AuthInterface> req)._authInfo = decoded;
+                (<AuthInterface>req)._authInfo = decoded;
             }
         });
 
@@ -38,8 +38,8 @@ export const RequireAuth: MethodDecorator = (_target: Object, _propertyKey: stri
     return descriptor;
 };
 
-export function getAuth(req: Request): any {
-    return (<AuthInterface> req)._authInfo;
+export function getAuth(req: Request): { id: any } {
+    return (<AuthInterface>req)._authInfo;
 }
 
 
