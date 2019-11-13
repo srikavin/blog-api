@@ -7,6 +7,10 @@ import {QueryParams, RestController} from '../RestController';
 import {IPost} from '../../schemas/post/IPost';
 import {CheckValidation} from '../../util/CheckValidation';
 import {getAuth, RequireAuth} from '../../util/RequireAuth';
+import {Comment} from "../../schemas/comment/Comment";
+import {IComment} from "../../schemas/comment/IComment";
+import {RequireCaptcha} from "../../util/RequireCaptcha";
+import crypto from 'crypto'
 
 interface PostQuery {
     slug?: string;
@@ -41,6 +45,15 @@ export class PostController extends RestController<IPost, IPostModel, PostQuery>
         body('tags.*').optional().isMongoId().withMessage('Must be a valid ID'),
         body('contents').optional().isString().withMessage('Must be a string')
     ];
+
+    private readonly newCommentValidators = [
+        param('id').isMongoId(),
+        body('contents').exists().isString().withMessage("Must be a string"),
+        body('email').exists().isEmail().withMessage("Must be a valid Email"),
+        body('username').exists().isString().withMessage("Must be a string"),
+        body('parent').optional().isMongoId().withMessage("Must be a valid ID")
+    ];
+
     private readonly populateFields = ['tags', {path: 'author', select: 'username}'}];
 
     constructor() {
@@ -51,6 +64,8 @@ export class PostController extends RestController<IPost, IPostModel, PostQuery>
         this.getAll = this.getAll.bind(this);
         this.getDrafts = this.getDrafts.bind(this);
         this.getByID = this.getByID.bind(this);
+        this.getCommentsById = this.getCommentsById.bind(this);
+        this.createNewComment = this.createNewComment.bind(this);
         this.create = this.create.bind(this);
         this.update = this.update.bind(this);
         this.delete = this.delete.bind(this);
@@ -61,6 +76,8 @@ export class PostController extends RestController<IPost, IPostModel, PostQuery>
         router.get('/drafts', this.queryValidators, this.getDrafts);
         router.post('/', this.createValidators, this.create);
         router.get('/:id', [param('id').isMongoId()], this.getByID);
+        router.get('/:id/comments', [param('id').isMongoId()], this.getCommentsById);
+        router.post('/:id/comments/new', this.newCommentValidators, this.createNewComment);
         router.put('/:id', this.updateValidators, this.update);
         router.delete('/:id', [param('id').isMongoId()], this.delete);
     }
@@ -91,6 +108,45 @@ export class PostController extends RestController<IPost, IPostModel, PostQuery>
 
         console.log(ret);
         return ret;
+    }
+
+    @CheckValidation
+    @RequireCaptcha
+    private createNewComment(req: Request, res: Response) {
+        Post.findById(req.params.id).then(e => {
+            console.log(1);
+            if (e == null) {
+                res.status(404).send({error: 'Post does not exist'});
+                return;
+            }
+
+            let email = req.body.email.trim().toLowerCase();
+            let emailHash = crypto.createHash('md5').update(email).digest("hex");
+
+            let gravatarUrl = `https://www.gravatar.com/avatar/${emailHash}.jpg?d=retro`;
+
+            let comment: IComment = {
+                contents: req.body.contents,
+                email: email,
+                gravatarUrl: gravatarUrl,
+                parent: req.body.parent,
+                post: req.params.id,
+                username: req.body.username,
+                visible: true
+            };
+
+            return Comment.create(comment).then(e => {
+                res.send(e);
+            }).catch(this.error(res));
+        }).catch(this.error(res));
+    }
+
+    @CheckValidation
+    private getCommentsById(req: Request, res: Response) {
+        Comment.find({post: req.params.id, visible: true})
+            .sort({createdAt: 'descending'})
+            .then(e => res.send(e))
+            .catch(this.error(res));
     }
 
     protected getModel(): Model<IPostModel> {

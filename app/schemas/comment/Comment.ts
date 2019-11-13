@@ -17,6 +17,10 @@ export const CommentSchema = DataSchema({
         required: true,
         select: false
     },
+    gravatarUrl: {
+        type: String,
+        required: true,
+    },
     contents: {
         type: String,
         required: true
@@ -31,6 +35,10 @@ export const CommentSchema = DataSchema({
         ref: 'Post',
         required: true,
         index: true
+    },
+    visible: {
+        type: Boolean,
+        default: true
     }
 }, {
     timestamps: {
