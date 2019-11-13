@@ -38,6 +38,21 @@ export const RequireAuth: MethodDecorator = (_target: Object, _propertyKey: stri
     return descriptor;
 };
 
+export function checkAuth(req: Request): boolean {
+    let token = req.headers['x-access-token'] as string;
+
+    jwt.verify(token, config.jwtSecret, (err: any, decoded: any) => {
+        if (err) {
+            return false;
+        }
+
+        if (decoded) {
+            return true;
+        }
+    });
+    return false;
+}
+
 export function getAuth(req: Request): { id: any } {
     return (<AuthInterface>req)._authInfo;
 }

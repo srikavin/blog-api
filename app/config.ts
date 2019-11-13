@@ -15,6 +15,10 @@ interface Config {
     dbPassword: string;
     jwtSecret: string;
     maxUsers: number;
+    useRecaptcha: true;
+    recaptchaSecret: string;
+    reverseProxy: boolean;
+    ipHeader: string;
 }
 
 let defaults = {
@@ -36,7 +40,11 @@ let defaults = {
 // jwt
     'jwtSecret': 'jwtsecret',
 // app settings
-    'maxUsers': 1
+    'maxUsers': 1,
+    'useRecaptcha': 'true',
+    'recaptchaSecret': '6Lfi7MEUAAAAABFLHK6Inv5kzAYRV2GlfalH5ga_',
+    'reverseProxy': false,
+    'ipHeader': 'X-Real-IP'
 };
 
 let config: Config = Object.assign(defaults, overrides);
