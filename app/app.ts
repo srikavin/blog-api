@@ -1,5 +1,6 @@
-import express, {Application} from 'express';
+import express, {Application, Request, Response, Router} from 'express';
 import path from 'path';
+import config from './config';
 
 import cookieParser from 'cookie-parser';
 import logger from 'morgan';
@@ -39,4 +40,14 @@ app.use('/api/v1/', filesRouter);
 app.use('/api/v1/', sitemapController.getRouter());
 app.use('/api/v1/auth', auth);
 
+let router = Router();
+app.use('/', router);
+
+router.get('/api/v1/landing', (_req: Request, res: Response) => {
+    if (config.customLandingPage) {
+        res.sendFile(path.join(__dirname, '..', config.customLandingPagePath));
+    } else {
+        res.status(400).send({error: "No landing page exists!"});
+    }
+});
 export default app;

@@ -15,6 +15,8 @@ interface Config {
     dbPassword: string;
     jwtSecret: string;
     maxUsers: number;
+    customLandingPage: boolean;
+    customLandingPagePath: string;
     useRecaptcha: true;
     recaptchaSecret: string;
     reverseProxy: boolean;
@@ -41,8 +43,12 @@ let defaults = {
     'jwtSecret': 'jwtsecret',
 // app settings
     'maxUsers': 1,
+    'customLandingPage': false,
+    'customLandingPagePath': '',
+// recaptcha
     'useRecaptcha': 'true',
     'recaptchaSecret': '6Lfi7MEUAAAAABFLHK6Inv5kzAYRV2GlfalH5ga_',
+// proxy settings
     'reverseProxy': false,
     'ipHeader': 'X-Real-IP'
 };
