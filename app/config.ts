@@ -17,7 +17,7 @@ interface Config {
     maxUsers: number;
     customLandingPage: boolean;
     customLandingPagePath: string;
-    useRecaptcha: true;
+    useRecaptcha: boolean;
     recaptchaSecret: string;
     reverseProxy: boolean;
     ipHeader: string;
@@ -46,7 +46,7 @@ let defaults = {
     'customLandingPage': false,
     'customLandingPagePath': '',
 // recaptcha
-    'useRecaptcha': 'true',
+    'useRecaptcha': true,
     'recaptchaSecret': '6Lfi7MEUAAAAABFLHK6Inv5kzAYRV2GlfalH5ga_',
 // proxy settings
     'reverseProxy': false,
