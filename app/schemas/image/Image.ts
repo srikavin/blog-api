@@ -22,6 +22,10 @@ export const ImageSchema = DataSchema({
     },
     height: {
         type: Schema.Types.Number
+    },
+    fileType: {
+        type: Schema.Types.String,
+        default: 'image/png'
     }
 }, {
     timestamps: {

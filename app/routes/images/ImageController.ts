@@ -34,26 +34,39 @@ router.get('/images/raw/:id', [
 
         let id = req.params.id;
 
-        gfs.exist({
-            _id: mongoose.Types.ObjectId(id),
-            root: 'images'
-        }, (err: Error, found: boolean) => {
-            if (err || !found) {
-                console.log(err);
-                res.status(404).send({error: 'File not found'});
-                return;
-            }
-            let stream = gfs.createReadStream({
-                _id: mongoose.Types.ObjectId(id),
-                root: 'images'
-            });
+        Image.findById(id)
+            .select({contents: false})
+            .then(e => {
+                if (e == null) {
+                    res.status(404).send()
+                    return
+                }
 
-            res.contentType('image/png');
-            stream.pipe(res);
-        });
+                gfs.exist({
+                    _id: mongoose.Types.ObjectId(id),
+                    root: 'images'
+                }, (err: Error, found: boolean) => {
+                    if (err || !found) {
+                        console.log(err);
+                        res.status(404);
+                        return;
+                    }
+                    let stream = gfs.createReadStream({
+                        _id: mongoose.Types.ObjectId(id),
+                        root: 'images'
+                    });
 
-        return;
-    });
+                    res.contentType(e.fileType);
+                    stream.pipe(res);
+                });
+            })
+            .catch(err => {
+                console.error(err);
+                res.status(500);
+            })
+    }
+);
+
 router.get('/images/:id', [
         param('id').isMongoId()
     ],
@@ -92,6 +105,7 @@ router.post('/images', [
             return res.status(422).json({errors: errors.array()});
         }
 
+
         let fileContents = Buffer.from(req.body.contents, 'base64');
 
         let img = sharp(fileContents);
@@ -100,11 +114,16 @@ router.post('/images', [
                 .png()
                 .toBuffer()
                 .then((value: Buffer) => {
+                    let format = meta.format
+                    if (format == 'svg') {
+                        format = 'svg+xml'
+                    }
                     Image.create({
                         title: req.body.title,
                         small: value,
                         width: meta.width,
-                        height: meta.height
+                        height: meta.height,
+                        fileType: `image/${format}`
                     }).then(e => {
                         let stream = gfs.createWriteStream({
                             _id: mongoose.Types.ObjectId(e._id),
