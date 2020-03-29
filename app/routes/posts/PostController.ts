@@ -6,7 +6,7 @@ import {body, param, query} from 'express-validator/check';
 import {QueryParams, RestController} from '../RestController';
 import {IPost} from '../../schemas/post/IPost';
 import {CheckValidation} from '../../util/CheckValidation';
-import {getAuth, RequireAuth} from '../../util/RequireAuth';
+import {checkAuth, getAuth, RequireAuth} from '../../util/RequireAuth';
 import {Comment} from "../../schemas/comment/Comment";
 import {IComment} from "../../schemas/comment/IComment";
 import {RequireCaptcha} from "../../util/RequireCaptcha";
@@ -104,9 +104,12 @@ export class PostController extends RestController<IPost, IPostModel, PostQuery>
             ret.fields.$text = {$search: search};
         }
 
-        ret.fields.draft = false;
+        if (!checkAuth(req)) {
+            ret.fields.draft = false
+        } else if (req.query.draft !== undefined) {
+            ret.fields.draft = req.query.draft
+        }
 
-        console.log(ret);
         return ret;
     }
 

@@ -41,16 +41,17 @@ export const RequireAuth: MethodDecorator = (_target: Object, _propertyKey: stri
 export function checkAuth(req: Request): boolean {
     let token = req.headers['x-access-token'] as string;
 
-    jwt.verify(token, config.jwtSecret, (err: any, decoded: any) => {
-        if (err) {
-            return false;
-        }
+    let ret = false
 
-        if (decoded) {
-            return true;
+    try {
+        if (jwt.verify(token, config.jwtSecret)) {
+            ret = true
         }
-    });
-    return false;
+    } catch (e) {
+        ret = false
+    }
+
+    return ret;
 }
 
 export function getAuth(req: Request): { id: any } {
