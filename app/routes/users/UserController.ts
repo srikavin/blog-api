@@ -6,6 +6,7 @@ import {RestController} from '../RestController';
 import {param, query} from 'express-validator/check';
 import {CheckValidation} from '../../util/CheckValidation';
 import {IUser} from '../../schemas/user/IUser';
+import {PublicCache} from "../../util/PublicCache";
 
 export class UserController extends RestController<IUser, IUserModel, null> {
     constructor() {
@@ -34,6 +35,7 @@ export class UserController extends RestController<IUser, IUserModel, null> {
     }
 
     @CheckValidation
+    @PublicCache(432000)
     private getByID(req: Request, res: Response) {
         this.getEntity(req.params.id)
             .then(this.sendEntity(res))

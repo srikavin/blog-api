@@ -11,6 +11,7 @@ import {Comment} from "../../schemas/comment/Comment";
 import {IComment} from "../../schemas/comment/IComment";
 import {RequireCaptcha} from "../../util/RequireCaptcha";
 import crypto from 'crypto'
+import {PublicCache} from "../../util/PublicCache";
 
 interface PostQuery {
     slug?: string;
@@ -144,6 +145,7 @@ export class PostController extends RestController<IPost, IPostModel, PostQuery>
         }).catch(this.error(res));
     }
 
+    @PublicCache(43200)
     @CheckValidation
     private getCommentsById(req: Request, res: Response) {
         Comment.find({post: req.params.id, visible: true})
@@ -156,6 +158,7 @@ export class PostController extends RestController<IPost, IPostModel, PostQuery>
         return Post;
     }
 
+    @PublicCache(43200)
     @CheckValidation
     private getByID(req: Request, res: Response) {
         this.getEntity(req.params.id, this.populateFields)
@@ -163,6 +166,7 @@ export class PostController extends RestController<IPost, IPostModel, PostQuery>
             .catch(this.error(res));
     }
 
+    @PublicCache(43200)
     @CheckValidation
     private getAll(req: Request, res: Response) {
         this.getEntities(this.handleQuery(req),

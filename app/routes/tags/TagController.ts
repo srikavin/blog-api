@@ -57,6 +57,7 @@ export class TagController extends RestController<ITag, ITagModel, TagFields> {
         return ret;
     }
 
+    @PublicCache(43200)
     @CheckValidation
     private getAll(req: Request, res: Response) {
         this.getEntities(this.handleQuery(req))
