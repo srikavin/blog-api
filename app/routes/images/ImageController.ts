@@ -56,6 +56,7 @@ router.get('/images/raw/:id', [
                         root: 'images'
                     });
 
+                    res.set('Cache-Control', 'public, max-age=31557600');
                     res.contentType(e.fileType);
                     stream.pipe(res);
                 });
@@ -85,6 +86,7 @@ router.get('/images/:id', [
             .exec()
             .then(e => {
                 if (e) {
+                    res.set('Cache-Control', 'public, max-age=31557600');
                     res.status(200).send(e);
                     return;
                 }

@@ -7,6 +7,7 @@ import {QueryParams, RestController} from '../RestController';
 import {CheckValidation} from '../../util/CheckValidation';
 import {RequireAuth} from '../../util/RequireAuth';
 import {ITag} from '../../schemas/tag/ITag';
+import {PublicCache} from "../../util/PublicCache";
 
 interface TagFields {
     _id: string
@@ -63,6 +64,7 @@ export class TagController extends RestController<ITag, ITagModel, TagFields> {
             .catch(this.error(res));
     }
 
+    @PublicCache()
     @CheckValidation
     private getByID(req: Request, res: Response) {
         this.getEntity(req.params.id)
