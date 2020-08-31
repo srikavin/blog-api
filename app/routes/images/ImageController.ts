@@ -123,7 +123,9 @@ router.post('/images', [
                     Image.create({
                         title: req.body.title,
                         small: value,
+                        // @ts-ignore
                         width: meta.width,
+                        // @ts-ignore
                         height: meta.height,
                         fileType: `image/${format}`
                     }).then(e => {

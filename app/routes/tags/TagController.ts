@@ -7,7 +7,6 @@ import {QueryParams, RestController} from '../RestController';
 import {CheckValidation} from '../../util/CheckValidation';
 import {RequireAuth} from '../../util/RequireAuth';
 import {ITag} from '../../schemas/tag/ITag';
-import {PublicCache} from "../../util/PublicCache";
 
 interface TagFields {
     _id: string

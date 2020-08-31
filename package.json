@@ -2,9 +2,10 @@
   "name": "blog-backend",
   "version": "0.0.0",
   "private": true,
+  "main": "build/firebaseEntry.js",
   "scripts": {
     "start": "npm run serve",
-    "build": "npm run npm run build-ts && npm run tslint",
+    "build": "npm run build-ts",
     "serve": "node build/start.js",
     "watch-node": "nodemon build/start.js",
     "watch": "concurrently -k -p \"[{name}]\" -n \"TypeScript,Node\" -c \"cyan.bold,green.bold\" \"npm run watch-ts\" \"npm run watch-node\"",
@@ -15,24 +16,28 @@
     "tslint": "tslint -c tslint.json -p tsconfig.json",
     "debug": "npm run build && npm run watch-debug",
     "serve-debug": "nodemon --inspect build/start.js",
-    "watch-debug": "concurrently -k -p \"[{name}]\" -n \"TypeScript,Node\" -c \"cyan.bold,green.bold\" \"npm run watch-ts\" \"npm run serve-debug\""
+    "watch-debug": "concurrently -k -p \"[{name}]\" -n \"TypeScript,Node\" -c \"cyan.bold,green.bold\" \"npm run watch-ts\" \"npm run serve-debug\"",
+    "serve:firebase": "npm run build && firebase emulators:start --only functions",
+    "shell:firebase": "npm run build && firebase functions:shell"
   },
   "dependencies": {
+    "firebase-admin": "^8.10.0",
+    "firebase-functions": "^3.6.1",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.18.3",
     "busboy": "^0.3.1",
     "cookie-parser": "~1.4.4",
     "debug": "~4.1.1",
     "express": "^4.16.4",
-    "express-validator": "^5.3.1",
+    "express-validator": "^6.6.0",
     "gridfs-stream": "^1.1.1",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.7.12",
     "morgan": "~1.9.1",
     "node-fetch": "^2.6.0",
-    "sharp": "^0.22.0",
+    "sharp": "^0.26.0",
     "tunnel-ssh": "^4.1.4",
-    "typescript": "^3.4.5",
+    "typescript": "3.9.7",
     "xml": "^1.0.1"
   },
   "devDependencies": {
@@ -48,6 +53,7 @@
     "@types/sharp": "^0.22.1",
     "@types/xml": "^1.0.3",
     "concurrently": "^4.1.0",
+    "firebase-functions-test": "^0.2.0",
     "nodemon": "^2.0.1"
   }
 }

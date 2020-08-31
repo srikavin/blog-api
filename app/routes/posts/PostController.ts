@@ -11,7 +11,6 @@ import {Comment} from "../../schemas/comment/Comment";
 import {IComment} from "../../schemas/comment/IComment";
 import {RequireCaptcha} from "../../util/RequireCaptcha";
 import crypto from 'crypto'
-import {PublicCache} from "../../util/PublicCache";
 
 interface PostQuery {
     slug?: string;
@@ -89,7 +88,7 @@ export class PostController extends RestController<IPost, IPostModel, PostQuery>
         let {slug, tags, author, search} = req.query;
 
         if (slug) {
-            ret.fields.slug = slug;
+            ret.fields.slug = slug as string;
         }
         if (tags) {
             ret.fields.tags = {
@@ -97,7 +96,7 @@ export class PostController extends RestController<IPost, IPostModel, PostQuery>
             };
         }
         if (author) {
-            ret.fields.author = author;
+            ret.fields.author = author as string;
         }
 
         if (search) {
@@ -108,7 +107,8 @@ export class PostController extends RestController<IPost, IPostModel, PostQuery>
         if (!checkAuth(req)) {
             ret.fields.draft = false
         } else if (req.query.draft !== undefined) {
-            ret.fields.draft = req.query.draft
+            // @ts-ignore
+            ret.fields.draft = req.query.draft === true || req.query.draft === 'true'
         }
 
         return ret;
@@ -145,7 +145,6 @@ export class PostController extends RestController<IPost, IPostModel, PostQuery>
         }).catch(this.error(res));
     }
 
-    @PublicCache(43200)
     @CheckValidation
     private getCommentsById(req: Request, res: Response) {
         Comment.find({post: req.params.id, visible: true})
@@ -158,7 +157,6 @@ export class PostController extends RestController<IPost, IPostModel, PostQuery>
         return Post;
     }
 
-    @PublicCache(43200)
     @CheckValidation
     private getByID(req: Request, res: Response) {
         this.getEntity(req.params.id, this.populateFields)
@@ -166,7 +164,6 @@ export class PostController extends RestController<IPost, IPostModel, PostQuery>
             .catch(this.error(res));
     }
 
-    @PublicCache(43200)
     @CheckValidation
     private getAll(req: Request, res: Response) {
         this.getEntities(this.handleQuery(req),

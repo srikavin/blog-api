@@ -1,3 +1,5 @@
+import * as functions from "firebase-functions";
+
 let overrides = require('../config.json');
 
 interface Config {
@@ -10,8 +12,11 @@ interface Config {
     sshUsername: string;
     sshPassword: string;
     dbHost: string;
+    dbHostSrv: boolean;
     dbPort: number;
     dbName: string;
+    dbUseAuth: boolean;
+    dbUsername: string;
     dbPassword: string;
     jwtSecret: string;
     maxUsers: number;
@@ -36,8 +41,11 @@ let defaults = {
     'sshPassword': '',
 // database - login
     'dbHost': 'localhost',
+    'dbHostSrv': false,
     'dbPort': 27017,
     'dbName': 'db',
+    'dbUseAuth': false,
+    'dbUsername': '',
     'dbPassword': '',
 // jwt
     'jwtSecret': 'jwtsecret',
@@ -52,6 +60,26 @@ let defaults = {
     'reverseProxy': false,
     'ipHeader': 'X-Real-IP'
 };
+
+if (process.env.FIREBASE_CONFIG) {
+    const firebaseConfig = functions.config().blog_api;
+
+    overrides = {
+        dbName: firebaseConfig.db_name,
+        dbHostSrv: true,
+        dbHost: firebaseConfig.db_host,
+        dbUseAuth: true,
+        dbUsername: firebaseConfig.db_username,
+        dbPassword: firebaseConfig.db_password,
+
+        jwtSecret: firebaseConfig.jwt_secret,
+
+        useRecaptcha: firebaseConfig.use_recaptcha === 'true',
+        recaptchaSecret: firebaseConfig.recaptcha_secret,
+
+        maxUsers: 1,
+    };
+}
 
 let config: Config = Object.assign(defaults, overrides);
 

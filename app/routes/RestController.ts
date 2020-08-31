@@ -14,7 +14,7 @@ interface PopulateType {
 }
 
 
-export abstract class RestController<T extends Schema, M extends Document, F> {
+export abstract class RestController<T, M extends Document, F> {
     protected defHandlers: RequestHandler[] = [bodyParser.json(), bodyParser.urlencoded({extended: true})];
     protected router: Router;
 
@@ -43,20 +43,21 @@ export abstract class RestController<T extends Schema, M extends Document, F> {
         return [];
     }
 
-    protected updateEntity(id: Types.ObjectId | string, entity: Partial<T>) {
+    protected updateEntity(id: Types.ObjectId | string, entity: Partial<M>) {
+        // @ts-ignore
         return this.getModel().updateOne({
             _id: id
         }, entity);
     }
 
-    protected getEntity(id: Types.ObjectId, populateFields: Array<string | PopulateType> = [],
+    protected getEntity(id: Types.ObjectId | string, populateFields: Array<string | PopulateType> = [],
                         custom: ((a: DocumentQuery<M | null, M>) => DocumentQuery<M | null, M>) = (e) => e) {
         let req = this.getModel().findById(id);
         return custom(this.handlePopulate(populateFields, req)).exec();
     }
 
-    protected getEntities(query: QueryParams<Partial<F>>, populateFields: Array<string | PopulateType> = [], sort: any = {},
-                          custom: ((a: DocumentQuery<M[], M>) => DocumentQuery<M[], M>) = (e) => e) {
+    protected getEntities(query: QueryParams<Partial<any>>, populateFields: Array<string | PopulateType> = [], sort: any = {},
+                          custom: ((a: DocumentQuery<any, any, any>) => DocumentQuery<M[], M>) = (e) => e) {
         let req = this.getModel()
             .find(query.fields)
             .skip(query.skip)
@@ -67,9 +68,11 @@ export abstract class RestController<T extends Schema, M extends Document, F> {
     protected handleQuery(req: Request): QueryParams<Partial<F>> {
         let ret: QueryParams<Partial<F>> = {limit: 50, skip: 0, fields: {}};
         if (req.query.limit) {
+            // @ts-ignore
             ret.limit = req.query.limit;
         }
         if (req.query.skip) {
+            // @ts-ignore
             ret.skip = req.query.skip;
         }
         return ret;
@@ -87,10 +90,12 @@ export abstract class RestController<T extends Schema, M extends Document, F> {
     }
 
     protected createEntity(entity: T) {
+        // @ts-ignore
         return this.getModel().create(entity);
     }
 
     protected deleteEntity(id: Types.ObjectId | string) {
+        // @ts-ignore
         return this.getModel().deleteOne({_id: id});
     }
 

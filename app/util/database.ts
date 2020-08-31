@@ -5,6 +5,11 @@ import mongoose from 'mongoose';
 import tunnel from 'tunnel-ssh';
 
 export const connection = new Promise(resolve => {
+    const dbAuthString = config.dbUseAuth ? `${config.dbUsername}:${config.dbPassword}@` : '';
+    const dbScheme = config.dbHostSrv ? 'mongodb+srv://' : 'mongodb://';
+
+    const host = config.dbHostSrv ? config.dbHost : `${config.dbHost}:${config.dbPort}`;
+
     if (config.sshTunnel) {
         let sshConfig = {
             username: config.sshUsername,
@@ -18,10 +23,10 @@ export const connection = new Promise(resolve => {
             if (error) {
                 console.error(error);
             }
-            mongoose.connect('mongodb://' + config.dbHost + '/' + config.dbName);
+            mongoose.connect(`${dbScheme}${dbAuthString}${host}/${config.dbName}`, {useNewUrlParser: true});
         });
     } else {
-        mongoose.connect('mongodb://' + config.dbHost + '/' + config.dbName);
+        mongoose.connect(`${dbScheme}${dbAuthString}${host}/${config.dbName}`, {useNewUrlParser: true});
     }
 
     const db = mongoose.connection;

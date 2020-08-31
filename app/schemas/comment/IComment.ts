@@ -1,4 +1,5 @@
 import {IPost} from "../post/IPost";
+import {Types} from "mongoose";
 
 export interface IComment extends Schema {
     username: string;
@@ -6,7 +7,7 @@ export interface IComment extends Schema {
     gravatarUrl: string
     contents: string;
     parent?: IComment;
-    post: IPost;
+    post: IPost | Types.ObjectId | string;
     visible: boolean;
     createdAt?: Date;
     updatedAt?: Date;

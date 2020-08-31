@@ -119,6 +119,7 @@ router.post('/files/new/:id', [
             return;
         }
 
+        // @ts-ignore
         File.create({
             _id: req.params.id,
             title: req.body.title,

@@ -81,7 +81,7 @@ router.get('/me', (req: Request, res: Response) => {
         return res.status(401).send({auth: false, message: 'No token provided.'});
     }
 
-    jwt.verify(token, config.jwtSecret, function (err: VerifyErrors) {
+    jwt.verify(token, config.jwtSecret, function (err: VerifyErrors | null) {
         if (err) {
             res.status(200).send({auth: false, message: 'Failed to authenticate token.'});
             return;

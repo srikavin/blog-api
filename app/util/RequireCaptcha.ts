@@ -1,6 +1,7 @@
 import {Request, Response} from 'express';
 import config from '../config';
 import fetch from 'node-fetch'
+import * as url from "url";
 
 export const RequireCaptcha: MethodDecorator = (_target: Object, _propertyKey: string | symbol, descriptor: TypedPropertyDescriptor<any>) => {
     let oldFunc: Function | undefined = descriptor.value;
@@ -20,14 +21,11 @@ export const RequireCaptcha: MethodDecorator = (_target: Object, _propertyKey: s
         // @ts-ignore
         let remoteIp: string = config.reverseProxy ? req.headers[config.ipHeader] : req.ip;
 
-        const verifyRequest = new URLSearchParams();
+        const verifyRequest = new url.URLSearchParams();
         verifyRequest.append('secret', config.recaptchaSecret);
         verifyRequest.append('response', token);
         verifyRequest.append('remoteip', remoteIp);
 
-        console.log(verifyRequest);
-
-        // @ts-ignore
         let response = await (await fetch('https://www.google.com/recaptcha/api/siteverify', {
             method: 'POST',
             body: verifyRequest
