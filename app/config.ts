@@ -1,6 +1,6 @@
 import * as functions from "firebase-functions";
 
-let overrides = require('../config.json');
+let overrides;
 
 interface Config {
     https: boolean;
@@ -79,6 +79,8 @@ if (process.env.FIREBASE_CONFIG) {
 
         maxUsers: 1,
     };
+} else {
+    overrides = require('../config.json');
 }
 
 let config: Config = Object.assign(defaults, overrides);
