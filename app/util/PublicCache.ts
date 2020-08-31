@@ -1,6 +1,6 @@
 import {NextFunction, Request, Response} from 'express';
 
-export function PublicCache(maxAge = 31557600): MethodDecorator {
+export function PublicCache(maxAge = 30 * 60): MethodDecorator {
     return (_target: Object, _propertyKey: string | symbol, descriptor: TypedPropertyDescriptor<any>) => {
         let oldFunc: Function | undefined = descriptor.value;
 
@@ -15,7 +15,7 @@ export function PublicCache(maxAge = 31557600): MethodDecorator {
     };
 }
 
-export const publicCacheMiddleware = (maxAge = 31557600) => {
+export const publicCacheMiddleware = (maxAge = 30 * 60) => {
     return (_: Request, res: Response, next: NextFunction) => {
         res.set('Cache-Control', 'public, max-age=' + maxAge);
         next();
