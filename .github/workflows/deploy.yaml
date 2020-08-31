@@ -19,7 +19,7 @@ jobs:
           node-version: 13.x
 
       - name: Install npm dependencies
-        run: npm install
+        run: npm install --arch=x64 --platform=linuxmusl
 
       - name: Deploy to firebase
         uses: w9jds/firebase-action@master
