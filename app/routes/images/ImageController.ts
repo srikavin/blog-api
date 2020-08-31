@@ -10,13 +10,14 @@ import bodyParser from 'body-parser';
 import {connection} from '../../util/database';
 import mongoose from 'mongoose';
 import * as Grid from 'gridfs-stream';
+import {publicCacheMiddleware} from "../../util/PublicCache";
 
 const gridfs = require('gridfs-stream');
 
 const router = Router();
 
-// @ts-ignore
-let gfs: Grid.grid;
+let gfs: Grid.Grid;
+
 connection.then(() => {
     gfs = gridfs(mongoose.connection.db, mongoose.mongo);
 });
@@ -24,7 +25,8 @@ connection.then(() => {
 router.use('/images/', bodyParser.json({limit: '25mb'}));
 
 router.get('/images/raw/:id', [
-        param('id').isMongoId()
+        param('id').isMongoId(),
+        publicCacheMiddleware()
     ],
     (req: Request, res: Response) => {
         const errors = validationResult(req);
@@ -43,7 +45,7 @@ router.get('/images/raw/:id', [
                 }
 
                 gfs.exist({
-                    _id: mongoose.Types.ObjectId(id),
+                    _id: id,
                     root: 'images'
                 }, (err: Error, found: boolean) => {
                     if (err || !found) {
@@ -52,7 +54,7 @@ router.get('/images/raw/:id', [
                         return;
                     }
                     let stream = gfs.createReadStream({
-                        _id: mongoose.Types.ObjectId(id),
+                        _id: id,
                         root: 'images'
                     });
 
@@ -69,7 +71,8 @@ router.get('/images/raw/:id', [
 );
 
 router.get('/images/:id', [
-        param('id').isMongoId()
+        param('id').isMongoId(),
+        publicCacheMiddleware()
     ],
     (req: Request, res: Response) => {
         const errors = validationResult(req);
@@ -130,12 +133,13 @@ router.post('/images', [
                         fileType: `image/${format}`
                     }).then(e => {
                         let stream = gfs.createWriteStream({
-                            _id: mongoose.Types.ObjectId(e._id),
+                            _id: e._id,
                             root: 'images',
                             mode: 'w'
                         });
 
                         stream.write(fileContents, () => {
+                            // @ts-ignore
                             stream.destroy();
                         });
 

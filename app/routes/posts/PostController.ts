@@ -118,7 +118,6 @@ export class PostController extends RestController<IPost, IPostModel, PostQuery>
     @RequireCaptcha
     private createNewComment(req: Request, res: Response) {
         Post.findById(req.params.id).then(e => {
-            console.log(1);
             if (e == null) {
                 res.status(404).send({error: 'Post does not exist'});
                 return;
