@@ -4,13 +4,14 @@ import {Image} from '../../schemas/image/Image';
 import {param, validationResult} from 'express-validator/check';
 import {auth} from '../../middle/auth';
 
-import sharp from 'sharp';
 import bodyParser from 'body-parser';
 
 import {connection} from '../../util/database';
 import mongoose from 'mongoose';
 import * as Grid from 'gridfs-stream';
 import {publicCacheMiddleware} from "../../util/PublicCache";
+
+const sharpImport = import('sharp').then(s => s.default);
 
 const gridfs = require('gridfs-stream');
 
@@ -104,14 +105,15 @@ router.get('/images/:id', [
 router.post('/images', [
         auth()
     ],
-    (req: Request, res: Response) => {
+    async (req: Request, res: Response) => {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
             return res.status(422).json({errors: errors.array()});
         }
 
-
         let fileContents = Buffer.from(req.body.contents, 'base64');
+
+        const sharp = await sharpImport;
 
         let img = sharp(fileContents);
         img.metadata().then(meta => {

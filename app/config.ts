@@ -1,5 +1,3 @@
-import * as functions from "firebase-functions";
-
 let overrides;
 
 interface Config {
@@ -62,7 +60,7 @@ let defaults = {
 };
 
 if (process.env.FIREBASE_CONFIG) {
-    const firebaseConfig = functions.config().blog_api;
+    const firebaseConfig = require('firebase-functions').config().blog_api;
 
     overrides = {
         dbName: firebaseConfig.db_name,

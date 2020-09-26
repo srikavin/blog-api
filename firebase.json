@@ -12,6 +12,6 @@
       "npm --prefix \"$RESOURCE_DIR\" run build"
     ],
     "source": ".",
-    "runtime": "nodejs10"
+    "runtime": "nodejs12"
   }
 }

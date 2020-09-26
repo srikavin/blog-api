@@ -31,7 +31,7 @@ export class SitemapController extends RestController<IPost, IPostModel, Sitemap
     @CheckValidation
     private getAll(req: Request, res: Response) {
         res.type('application/xml');
-        const hostname = req.headers['host'];
+        const hostname = req.headers['x-forwarded-host'] || req.headers['host'];
 
         let links: any = [];
 
